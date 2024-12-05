@@ -18,3 +18,10 @@ Bot ini dibuat untuk terhubung ke Gradient Network menggunakan Node.js. Bot ini 
    npm start
 Keterangan
 Bot ini akan melakukan koneksi ke Gradient Network, memastikan node berjalan dengan benar, dan menampilkan ID serta email pengguna. Jika terjadi kesalahan, bot akan menampilkan pesan kesalahan yang sesuai. Bot ini juga mendukung penggunaan proxy untuk mengelola koneksi jaringan.
+
+gradient-bot/
+├── bot.js
+├── package.json
+├── proxy.txt
+├── token.txt
+└── README.md
