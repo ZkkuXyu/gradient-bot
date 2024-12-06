@@ -8,6 +8,7 @@ const ora = require('ora');
 const MAX_RETRIES = 5;
 const REQUEST_TIMEOUT = 10000;
 const API_BASE_URL = 'https://api.gradient.network';
+const API_VERSION = 'v1';
 
 // Fungsi untuk membaca dan validasi file konfigurasi
 function readConfig(filename) {
@@ -60,34 +61,51 @@ async function connectToGradientNetwork(axiosInstance) {
             throw new Error('ID Token tidak ditemukan di file konfigurasi');
         }
 
-        // Coba koneksi ke endpoint
-        const response = await axiosInstance.get(`${API_BASE_URL}/connect`, {
-            params: { 
-                token: ID_TOKEN,
-                // Tambahkan parameter lain jika diperlukan
-            },
-            timeout: REQUEST_TIMEOUT,
-            headers: {
-                'User-Agent': 'GradientNetwork-Bot/1.0',
-                'Accept': 'application/json',
-                // Tambahkan header lain jika diperlukan
-            },
-            validateStatus: function (status) {
-                return status >= 200 && status < 500;
+        // Coba beberapa endpoint yang mungkin
+        const endpoints = [
+            '/v1/connect',
+            '/api/connect',
+            '/node/connect',
+            '/connect'
+        ];
+
+        let lastError = null;
+        
+        // Mencoba setiap endpoint
+        for (const endpoint of endpoints) {
+            try {
+                console.log(`Mencoba endpoint: ${endpoint}`);
+                const response = await axiosInstance.get(`${API_BASE_URL}${endpoint}`, {
+                    params: { 
+                        token: ID_TOKEN,
+                        version: API_VERSION
+                    },
+                    timeout: REQUEST_TIMEOUT,
+                    headers: {
+                        'User-Agent': 'GradientNetwork-Bot/1.0',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${ID_TOKEN}`
+                    }
+                });
+
+                if (response.status === 200) {
+                    console.log(`Berhasil terhubung menggunakan endpoint: ${endpoint}`);
+                    return true;
+                }
+            } catch (error) {
+                lastError = error;
+                console.log(`Endpoint ${endpoint} tidak berhasil:`, error.message);
             }
-        });
-
-        // Log untuk debugging
-        console.log('Mencoba koneksi ke:', API_BASE_URL);
-        console.log('Status response:', response.status);
-
-        if (response.status === 200) {
-            return true;
-        } else {
-            throw new Error(`Koneksi gagal dengan status: ${response.status}`);
         }
+
+        // Jika semua endpoint gagal
+        throw new Error(`Tidak dapat menemukan endpoint yang valid. Error terakhir: ${lastError.message}`);
+
     } catch (error) {
         console.error('Detail error:', error.message);
+        if (error.response) {
+            console.error('Response error:', error.response.data);
+        }
         throw error;
     }
 }
