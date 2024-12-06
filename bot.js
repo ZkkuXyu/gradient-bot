@@ -8,7 +8,7 @@ const ora = require('ora');
 const MAX_RETRIES = 5;
 const REQUEST_TIMEOUT = 10000;
 const API_BASE_URL = 'https://api.gradient.network';
-const API_VERSION = 'v1';
+const API_ENDPOINT = '/api/point/stats';
 
 // Fungsi untuk membaca dan validasi file konfigurasi
 function readConfig(filename) {
@@ -61,51 +61,60 @@ async function connectToGradientNetwork(axiosInstance) {
             throw new Error('ID Token tidak ditemukan di file konfigurasi');
         }
 
-        // Coba beberapa endpoint yang mungkin
-        const endpoints = [
-            '/v1/connect',
-            '/api/connect',
-            '/node/connect',
-            '/connect'
-        ];
+        // Hapus 'Bearer ' jika sudah ada di token
+        const cleanToken = ID_TOKEN.replace('Bearer ', '');
+        const bearerToken = `Bearer ${cleanToken}`;
 
-        let lastError = null;
-        
-        // Mencoba setiap endpoint
-        for (const endpoint of endpoints) {
-            try {
-                console.log(`Mencoba endpoint: ${endpoint}`);
-                const response = await axiosInstance.get(`${API_BASE_URL}${endpoint}`, {
-                    params: { 
-                        token: ID_TOKEN,
-                        version: API_VERSION
-                    },
-                    timeout: REQUEST_TIMEOUT,
-                    headers: {
-                        'User-Agent': 'GradientNetwork-Bot/1.0',
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${ID_TOKEN}`
-                    }
-                });
+        console.log('='.repeat(50));
+        console.log('Informasi Koneksi:');
+        console.log(`URL: ${API_BASE_URL}${API_ENDPOINT}`);
+        console.log(`Token: ${bearerToken.substring(0, 20)}...`);
+        console.log('='.repeat(50));
 
-                if (response.status === 200) {
-                    console.log(`Berhasil terhubung menggunakan endpoint: ${endpoint}`);
-                    return true;
+        try {
+            const response = await axiosInstance.get(`${API_BASE_URL}${API_ENDPOINT}`, {
+                params: { 
+                    token: cleanToken,  // Token tanpa 'Bearer'
+                    email: USER_EMAIL
+                },
+                timeout: REQUEST_TIMEOUT,
+                headers: {
+                    'User-Agent': 'GradientNetwork-Bot/1.0',
+                    'Accept': 'application/json',
+                    'Authorization': bearerToken,  // Gunakan Bearer token
+                    'Content-Type': 'application/json'
                 }
-            } catch (error) {
-                lastError = error;
-                console.log(`Endpoint ${endpoint} tidak berhasil:`, error.message);
+            });
+
+            if (response.status === 200) {
+                console.log('='.repeat(50));
+                console.log('Statistik Point:');
+                console.log('Response:', response.data);
+                console.log('='.repeat(50));
+                return true;
             }
+        } catch (error) {
+            console.log(`Gagal mengakses stats: ${error.message}`);
+            if (error.response) {
+                console.log('Response status:', error.response.status);
+                console.log('Response data:', error.response.data);
+            }
+            throw error;
         }
 
-        // Jika semua endpoint gagal
-        throw new Error(`Tidak dapat menemukan endpoint yang valid. Error terakhir: ${lastError.message}`);
+        // Jika gagal, coba ping server
+        try {
+            console.log('\nMencoba ping server...');
+            const pingResponse = await axiosInstance.get(`${API_BASE_URL}/ping`);
+            console.log('Ping response:', pingResponse.status);
+        } catch (pingError) {
+            console.log('Ping gagal:', pingError.message);
+        }
+
+        throw new Error('Gagal mengakses statistik point');
 
     } catch (error) {
-        console.error('Detail error:', error.message);
-        if (error.response) {
-            console.error('Response error:', error.response.data);
-        }
+        console.error('\nDetail error:', error.message);
         throw error;
     }
 }
@@ -113,24 +122,24 @@ async function connectToGradientNetwork(axiosInstance) {
 // Fungsi dengan mekanisme retry
 async function connectWithRetry(axiosInstance) {
     let retries = 0;
-    const spinner = ora('bot tod mencoba terhubung...').start();
+    const spinner = ora('bot tod mencoba mengakses statistik point...').start();
     
     while (retries < MAX_RETRIES) {
         try {
-            spinner.text = `bot tod mencoba koneksi ke-${retries + 1}...`;
+            spinner.text = `bot tod mencoba akses ke-${retries + 1}...`;
             const result = await connectToGradientNetwork(axiosInstance);
-            spinner.succeed('bot tod berhasil terhubung!');
+            spinner.succeed('bot tod berhasil mendapatkan statistik!');
             return result;
         } catch (error) {
             retries++;
             spinner.warn(`Percobaan ${retries}/${MAX_RETRIES} gagal: ${error.message}`);
             
             if (retries < MAX_RETRIES) {
-                const waitTime = retries * 3000; // Menambah waktu tunggu
+                const waitTime = retries * 3000;
                 spinner.text = `bot tod akan mencoba lagi dalam ${waitTime/1000} detik...`;
                 await delay(waitTime);
             } else {
-                spinner.fail(`bot tod gagal terhubung setelah ${MAX_RETRIES} percobaan`);
+                spinner.fail(`bot tod gagal mengakses statistik setelah ${MAX_RETRIES} percobaan`);
                 return false;
             }
         }
@@ -181,9 +190,9 @@ rl.question('Apakah Anda ingin menggunakan proxy? (yes/no): ', async (answer) =>
     try {
         const success = await connectWithRetry(axiosInstance);
         if (success) {
-            spinner.succeed('bot tod berhasil terhubung ke Gradient Network!');
+            spinner.succeed('bot tod berhasil mengakses statistik point!');
         } else {
-            spinner.fail('bot tod gagal terhubung ke Gradient Network.');
+            spinner.fail('bot tod gagal mengakses statistik point.');
         }
     } finally {
         rl.close();
