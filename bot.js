@@ -5,8 +5,8 @@ const readline = require('readline');
 const ora = require('ora');
 
 // Konfigurasi konstanta
-const MAX_RETRIES = 3;
-const REQUEST_TIMEOUT = 5000;
+const MAX_RETRIES = 5;
+const REQUEST_TIMEOUT = 10000;
 const API_BASE_URL = 'https://api.gradient.network';
 
 // Fungsi untuk membaca dan validasi file konfigurasi
@@ -60,33 +60,34 @@ async function connectToGradientNetwork(axiosInstance) {
             throw new Error('ID Token tidak ditemukan di file konfigurasi');
         }
 
+        // Coba koneksi ke endpoint
         const response = await axiosInstance.get(`${API_BASE_URL}/connect`, {
-            params: { token: ID_TOKEN },
-            timeout: REQUEST_TIMEOUT
+            params: { 
+                token: ID_TOKEN,
+                // Tambahkan parameter lain jika diperlukan
+            },
+            timeout: REQUEST_TIMEOUT,
+            headers: {
+                'User-Agent': 'GradientNetwork-Bot/1.0',
+                'Accept': 'application/json',
+                // Tambahkan header lain jika diperlukan
+            },
+            validateStatus: function (status) {
+                return status >= 200 && status < 500;
+            }
         });
 
-        if (response.status !== 200) {
+        // Log untuk debugging
+        console.log('Mencoba koneksi ke:', API_BASE_URL);
+        console.log('Status response:', response.status);
+
+        if (response.status === 200) {
+            return true;
+        } else {
             throw new Error(`Koneksi gagal dengan status: ${response.status}`);
         }
-
-        // Ping untuk verifikasi koneksi
-        const pingResponse = await axiosInstance.get(`${API_BASE_URL}/ping`, {
-            params: { token: ID_TOKEN },
-            timeout: REQUEST_TIMEOUT
-        });
-
-        console.log('='.repeat(50));
-        console.log(`Node berjalan dengan ID: ${ID_TOKEN}`);
-        console.log(`Email pengguna: ${USER_EMAIL}`);
-        console.log('Ping berhasil:', pingResponse.data);
-        console.log('='.repeat(50));
-
-        return true;
     } catch (error) {
-        console.error('Kesalahan saat menjalankan node:', error.message);
-        if (error.response) {
-            console.error('Response error:', error.response.data);
-        }
+        console.error('Detail error:', error.message);
         throw error;
     }
 }
@@ -94,28 +95,29 @@ async function connectToGradientNetwork(axiosInstance) {
 // Fungsi dengan mekanisme retry
 async function connectWithRetry(axiosInstance) {
     let retries = 0;
+    const spinner = ora('bot tod mencoba terhubung...').start();
     
     while (retries < MAX_RETRIES) {
         try {
-            return await connectToGradientNetwork(axiosInstance);
+            spinner.text = `bot tod mencoba koneksi ke-${retries + 1}...`;
+            const result = await connectToGradientNetwork(axiosInstance);
+            spinner.succeed('bot tod berhasil terhubung!');
+            return result;
         } catch (error) {
             retries++;
-            console.error('Kesalahan:', error.message);
+            spinner.warn(`Percobaan ${retries}/${MAX_RETRIES} gagal: ${error.message}`);
             
-            if (error.response) {
-                console.error('Response error:', error.response.data);
-            }
-
             if (retries < MAX_RETRIES) {
-                const waitTime = retries * 2000; // Meningkatkan waktu tunggu setiap retry
-                console.log(`Mencoba koneksi ulang (${retries}/${MAX_RETRIES}) dalam ${waitTime/1000} detik...`);
+                const waitTime = retries * 3000; // Menambah waktu tunggu
+                spinner.text = `bot tod akan mencoba lagi dalam ${waitTime/1000} detik...`;
                 await delay(waitTime);
             } else {
-                console.error('Gagal terhubung setelah', MAX_RETRIES, 'percobaan');
+                spinner.fail(`bot tod gagal terhubung setelah ${MAX_RETRIES} percobaan`);
                 return false;
             }
         }
     }
+    return false;
 }
 
 // Fungsi untuk validasi proxy URL
