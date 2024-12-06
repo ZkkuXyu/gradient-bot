@@ -25,3 +25,6 @@ gradient-bot/
 ├── proxy.txt
 ├── token.txt
 └── README.md
+
+MIT LICENSE
+Saya memberikan izin kepada pengguna lain untuk menggunakan, menyalin, memodifikasi, dan mendistribusikan perangkat lunak sesuai dengan ketentuan lisensi MIT.
