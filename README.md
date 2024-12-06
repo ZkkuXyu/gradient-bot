@@ -31,7 +31,7 @@ Bot ini dibuat untuk terhubung ke Gradient Network menggunakan Node.js. Bot ini 
 Saya memberikan izin kepada pengguna lain untuk menggunakan, memodifikasi, dan mendistribusikan perangkat lunak sesuai dengan ketentuan lisensi MIT.
 NOTE MEMODIFIKASI DAN MEMPERBARUI BOT YANG TELAH SAYA BUAT
 
-# Keterangan  
+# Struktur Proyek
    ```sh
    gradient-bot
    ├── bot.js
