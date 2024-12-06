@@ -26,14 +26,18 @@ Bot ini dibuat untuk terhubung ke Gradient Network menggunakan Node.js. Bot ini 
 5. Jalankan bot
    ```sh
    npm start
-Keterangan
-gradient-bot
-├── bot.js
-├── package.json
-├── proxy.txt
-├── token.txt
-└── README.md
 
 # MIT LICENSE
 Saya memberikan izin kepada pengguna lain untuk menggunakan, memodifikasi, dan mendistribusikan perangkat lunak sesuai dengan ketentuan lisensi MIT.
 NOTE MEMODIFIKASI DAN MEMPERBARUI BOT YANG TELAH SAYA BUAT
+
+# Keterangan  
+   ```sh
+   gradient-bot
+   ├── bot.js
+   ├── package.json
+   ├── proxy.txt
+   ├── token.txt
+   └── README.md
+
+
