@@ -12,12 +12,22 @@ Bot ini dibuat untuk terhubung ke Gradient Network menggunakan Node.js. Bot ini 
    ```sh
     npm install
 3. Buat file token.txt
+
+# Memasukan toke yang benar:
+   
+![Screenshot 2024-12-06 212318](https://github.com/user-attachments/assets/2a89bf43-3ea2-4d79-963a-8afffbadf856)
+
+# Memasukan token yang salah:
+
+![Screenshot 2024-12-06 212335](https://github.com/user-attachments/assets/f9bbd834-e6b0-4d67-8ec7-dcfc3391bb43)
+
+
 4. Buat proxy (opsional) edit file proxy apabila anda ingin mennguanakannya
 5. Jalankan bot
    ```sh
    npm start
 Keterangan
-gradient-bot/
+gradient-bot
 ├── bot.js
 ├── package.json
 ├── proxy.txt
