@@ -1,7 +1,7 @@
 {
   "name": "gradient-bot",
   "version": "1.0.0",
-  "description": "Bot untuk terhubung ke Gradient Network",
+  "description": "Bot untuk Gradient Network",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
@@ -11,9 +11,6 @@
     "https-proxy-agent": "^7.0.2",
     "ora": "^5.4.1"
   },
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "author": "ZkkuXyu",
+  "author": "zkkuxyu",
   "license": "MIT"
 }
