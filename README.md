@@ -27,12 +27,19 @@ Bot ini dibuat untuk terhubung ke Gradient Network menggunakan Node.js. Bot ini 
    ```sh
    npm start
 
-# MIT LICENSE
+## Token txt
+
+Klik F12 setelah itu pilih Menu Network Masuk ke stat dan copy authorization beare eyj.........
+
+![Screenshot 2024-12-07 112635](https://github.com/user-attachments/assets/58a45536-a437-4484-a441-ff1acbe5a26e)
+
+
+## MIT LICENSE
 Saya memberikan izin kepada pengguna lain untuk menggunakan, memodifikasi, dan mendistribusikan perangkat lunak sesuai dengan ketentuan lisensi MIT.
 
 NOTE MEMODIFIKASI DAN MEMPERBARUI BOT YANG TELAH DI BUAT
 
-# Struktur Proyek
+## Struktur Proyek
    ```sh
    gradient-bot
    ├── bot.js
